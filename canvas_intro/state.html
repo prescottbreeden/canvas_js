@@ -14,14 +14,16 @@
 
 		let ctx = document.getElementById('ctx').getContext('2d');
 		ctx.font = '30px Calibri';
-		ctx.strokeText("Hello Canvas", 150, 250);
-		
-		ctx.moveTo(100,300);
-		ctx.lineTo(200,300);
-		ctx.stroke();
+		ctx.fillText("Sample",200,100);
+		ctx.save();
 
-		ctx.fillStyle = '#efa556';
-		ctx.fillRect(300, 400, 150, 50);
+		ctx.fillStyle = 'red';
+		ctx.fillRect(200,200,100,100);
+		
+		// ctx.fillStyle = 'black';
+		ctx.restore();
+		ctx.fillText('Sample',200,400);
+		
 	
 	</script>
 </body>
