@@ -3,32 +3,78 @@
 <head>
 	<meta charset="UTF-8">
 	<title>SNAKE! It's a SNAKE!</title>
+<style>
+body {
+	background-color: #0A3B00;
+}
+h1 {
+	color: #eee;
+	text-align: center;
+	margin-top: 50px;
+}
+.game {
+	position: relative;
+}
+.canvas {
+	border: 2px solid black;
+	background-color: #eee;
+	position: absolute;
+	top: 20px;
+	left: 50%;
+	transform: translateX(-50%);
+}
+</style>
 </head>
 <body>
+	<div class="header">
+		<h1>The Amazing Snake Game</h1>
+	</div>
+	<div class="game">
 	<canvas 
 		height="500"
 		width="500"
-		style="border:2px solid black"
+		class="canvas"
 		id="ctx"></canvas>
+	</div>
 
 <script>
+// globals
+let snakeList, foodList, direction, eaten, intervalVar, score, running=false, fps=20;
+
 let ctx = document.getElementById('ctx').getContext('2d');
 let WIDTH = 500;
 let HEIGHT = 500;
-let snakeList, foodList, direction, eaten, intervalVar;
 ctx.font = "20px Calibri";
+ctx.fillText('Click me to start game!',130,250);
+
+// ============================ //
+// ------ EVENT LISTENERS ----- //
+// ============================ //
+
+document.getElementById('ctx').onmousedown = function() {
+	if(running) {
+		clearInterval(intervalVar);
+		fps=20;
+		running = false;
+	}
+	startGame();
+}
 
 document.onkeydown = (event) => {
 	if(event.keyCode === 37 || event.keyCode === 65)	{
+		if(direction === 2) { return; }
 		direction = 0; // 0 - Left
 	}
 	if(event.keyCode === 38 || event.keyCode === 87)	{
+		if(direction === 3) { return; }
 		direction = 1; // 1 - up
 	}
 	if(event.keyCode === 39 || event.keyCode === 68)	{
+		if(direction === 0) { return; }
 		direction = 2; // 2 - right
 	}
 	if(event.keyCode === 40 || event.keyCode === 83)	{
+		if(direction === 1) { return; }
 		direction = 3; // 3 - down
 	}
 }
@@ -68,15 +114,6 @@ drawFood = (f, i) => {
 	ctx.fillStyle = food.color;
 	ctx.fillRect(f.x, f.y, food.width, food.height);
 	ctx.restore();
-}
-
-testCollision = (rect1, rect2) => {
-	return (
-			(rect1.x <= rect2.x + food.width) &&
-			(rect2.x <= rect1.x + snakeBody.width) &&
-			(rect1.y <= rect2.y + food.height) &&
-			(rect2.y <= rect1.y + snakeBody.height) 
-	);
 }
 
 checkSnakePosition = () => {
@@ -127,15 +164,49 @@ updateSnakeList = () => {
 		}
 	}
 }
+// ============================ //
+// -------- GAME LOGIC -------- //
+// ============================ //
 
-isGameOver = () => {
+function startGame() {
+	running = true;
+	snakeList = [
+		{x:220, y:200},
+		{x:210, y:200},
+		{x:200, y:200}
+	];
+	foodList = [];
+	score = 0;
+	direction=99;
+	eaten = true;
+	intervalVar = setInterval(updateSnakePosition, fps);
+}
+
+function isGameOver() {
 	for(i in snakeList) {
 		if(i==0) { continue; }
-		if(testCollisionSnake(snakeList[0].snakeList[i])) {
+		if(testCollisionSnake(snakeList[0], snakeList[i])) {
 			clearInterval(intervalVar);
+			ctx.fillText('Game Over! Click to restart', 100, 250);
 			return;
 		}
 	}
+}
+
+function testCollision(rect1, rect2) {
+	return (
+			(rect1.x <= rect2.x + food.width) &&
+			(rect2.x <= rect1.x + snakeBody.width) &&
+			(rect1.y <= rect2.y + food.height) &&
+			(rect2.y <= rect1.y + snakeBody.height)
+	);
+}
+
+function testCollisionSnake(snake1, snake2) {
+	return (
+			(Math.abs(snake1.x-snake2.x)<5) &&
+			(Math.abs(snake1.y-snake2.y)<5)
+	);
 }
 
 // ============================ //
@@ -156,6 +227,10 @@ updateSnakePosition = () => {
 	if(testCollision(snakeList[0], foodList[0])) {
 		foodList = [];
 		eaten = true;
+		score += 1;
+		if(score % 5 === 0) {
+			fps*=0.5;
+		}
 		let new_x, new_y;
 		if (direction == 0) {
 			new_x = snakeList[0].x - 10;
@@ -175,23 +250,12 @@ updateSnakePosition = () => {
 		}
 		snakeList.unshift({x: new_x, y: new_y});
 	}
+	ctx.fillText('Score: '+score,400,30);
 	isGameOver();
 	checkSnakePosition();
 	updateSnakeList();
 }
 
-startGame = () => {
-	snakeList = [
-		{x:220, y:200},
-		{x:210, y:200},
-		{x:200, y:200}
-	];
-	foodList = [];
-	direction=99;
-	eaten = true;
-	intervalVar = setInterval(updateSnakePosition, 20);
-}
-startGame();
 
 
 </script>
